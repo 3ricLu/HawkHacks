@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faList } from "@fortawesome/free-solid-svg-icons";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
@@ -35,16 +35,16 @@ const Navigation = () => {
   }
 
   return (
-    <div className="nav-bar-container bg-gray-200 h-screen w-96 xl:w-1/6 md:w-80 sm:w-64 flex flex-col">
+    <div className="nav-bar-container bg-gray-200 h-screen w-96 xl:w-1/4 md:w-80 sm:w-64 flex flex-col">
       <div className="nav-bar-top">
         <div className="logo-title flex flex-row object-contain mb-8 hover:cursor-pointer">
           <img
-            className="logo object-scale-down w-1/3"
+            className="logo object-scale-down w-1/3 pl-2 pt-2 pr-3"
             src={logo}
             onClick={handleHomeClick}
           ></img>
           <p
-            className="text-base sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl text-white w-2/3 font-bold text-left flex items-center"
+            className="text-base sm:text-2xl md:text-3xl lg:text-2xl xl:text-3xl text-white w-2/3 font-bold text-left flex items-center pt-1"
             onClick={handleHomeClick}
           >
             CONVERGE
@@ -61,7 +61,7 @@ const Navigation = () => {
           >
             <div className="flex flex-row justify-center items-center h-full">
               <FontAwesomeIcon
-                icon={faMagnifyingGlass}
+                icon={faList}
                 className="object-contain h-2/4 w-5 text-white p-4"
               />
               <div className="flex btn-text text-white h-8 font-bold items-center text-base lg:text-xl sm:text-sm">

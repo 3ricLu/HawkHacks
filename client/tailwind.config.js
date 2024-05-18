@@ -9,7 +9,7 @@ export default {
       xl: "1440px",
     },
     colors: {
-      white: "#F8F0FB",
+      white: "#E5F7F3",
       blue: "#1fb6ff",
       pink: "#ff49db",
       orange: "#ff7849",
@@ -23,8 +23,8 @@ export default {
         400: "#6E676E",
       },
       purple: {
-        100: "#6320EE",
-        200: "#7236EF",
+        100: "#3A5B69",
+        200: "#A4CACE",
       },
       200: "#7236EF",
     },
