@@ -1,4 +1,4 @@
-import Navigation from "../components/Navigation.tsx";
+import Navigation from "../components/Navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
 import "../App.css";
 

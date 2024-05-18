@@ -1,4 +1,4 @@
-import Navigation from "../components/Navigation.tsx";
+import Navigation from "../components/Navigation";
 
 export default function GroupPage() {
   return (
