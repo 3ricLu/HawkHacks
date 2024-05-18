@@ -1,6 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import { Link } from "react-router-dom";
+import Navigation from "../components/Navigation";
 
 interface ProfileData {
   name: string;
@@ -14,13 +13,13 @@ interface ProfileData {
 
 const ProfilePage: React.FC = () => {
   const profile: ProfileData = {
-    name: 'John',
-    surname: 'Doe',
-    email: 'john.doe@example.com',
+    name: "John",
+    surname: "Doe",
+    email: "john.doe@example.com",
     age: 30,
-    tags: ['Front-end', 'UI/UX'],
-    headline: 'Senior Front-end Developer',
-    bio: 'Experienced developer specializing in React and TypeScript.',
+    tags: ["Front-end", "UI/UX"],
+    headline: "Senior Front-end Developer",
+    bio: "Experienced developer specializing in React and TypeScript.",
   };
 
   return (
@@ -42,7 +41,7 @@ const ProfilePage: React.FC = () => {
             <strong>Age:</strong> {profile.age}
           </div>
           <div className="flex flex-col">
-            <strong>Tags:</strong> {profile.tags.join(', ')}
+            <strong>Tags:</strong> {profile.tags.join(", ")}
           </div>
           <div className="flex flex-col">
             <strong>Headline:</strong> {profile.headline}
@@ -50,7 +49,10 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col">
             <strong>Bio:</strong> {profile.bio}
           </div>
-          <Link to="/edit-profile" className="bg-blue-500 text-blue p-2 rounded mt-4 text-center">
+          <Link
+            to="/edit-profile"
+            className="bg-blue-500 text-blue p-2 rounded mt-4 text-center"
+          >
             Edit Profile
           </Link>
         </div>
