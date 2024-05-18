@@ -1,7 +1,7 @@
 // client/src/pages/EditProfilePage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navigation from "../components/Navigation";
 
 interface ProfileData {
   name: string;
@@ -15,35 +15,39 @@ interface ProfileData {
 }
 
 const categories = [
-  'Front-end',
-  'Back-end',
-  'Full-Stack',
-  'CyberSecurity',
-  'UI/UX',
-  'Finance',
-  'Accounting',
-  'HR',
-  'Operations',
-  'Marketing',
-  'Health',
-  'Physical Labour'
+  "Front-end",
+  "Back-end",
+  "Full-Stack",
+  "CyberSecurity",
+  "UI/UX",
+  "Finance",
+  "Accounting",
+  "HR",
+  "Operations",
+  "Marketing",
+  "Health",
+  "Physical Labour",
 ];
+
+categories.sort();
 
 const EditProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<ProfileData>({
-    name: '',
-    surname: '',
-    email: '',
+    name: "",
+    surname: "",
+    email: "",
     age: 0,
     tags: [],
-    headline: '',
-    bio: '',
-    resume: null
+    headline: "",
+    bio: "",
+    resume: null,
   });
 
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setProfile({ ...profile, [name]: value });
   };
@@ -71,7 +75,7 @@ const EditProfilePage: React.FC = () => {
     e.preventDefault();
     // Process or save profile data
     console.log(profile);
-    navigate('/profile'); // Navigate back to the profile page after saving
+    navigate("/profile"); // Navigate back to the profile page after saving
   };
 
   return (
@@ -173,10 +177,17 @@ const EditProfilePage: React.FC = () => {
             />
           </div>
           <div className="flex flex-row justify-between">
-            <button type="button" onClick={() => navigate('/profile')} className="bg-gray-500 text-blue p-2 rounded mt-4">
+            <button
+              type="button"
+              onClick={() => navigate("/profile")}
+              className="bg-gray-500 text-blue p-2 rounded mt-4"
+            >
               Cancel
             </button>
-            <button type="submit" className="bg-blue-500 text-blue p-2 rounded mt-4">
+            <button
+              type="submit"
+              className="bg-blue-500 text-blue p-2 rounded mt-4"
+            >
               Save
             </button>
           </div>
