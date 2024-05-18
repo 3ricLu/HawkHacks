@@ -39,12 +39,12 @@ const Navigation = () => {
       <div className="nav-bar-top">
         <div className="logo-title flex flex-row object-contain mb-8 hover:cursor-pointer">
           <img
-            className="logo object-scale-down w-1/3 pl-2 pt-2 pr-3"
+            className="logo object-scale-down w-1/4 ml-5 mt-5 mr-3"
             src={logo}
             onClick={handleHomeClick}
           ></img>
           <p
-            className="text-base sm:text-2xl md:text-3xl lg:text-2xl xl:text-3xl text-white w-2/3 font-bold text-left flex items-center pt-1"
+            className="text-base sm:text-2xl md:text-3xl lg:text-2xl xl:text-3xl text-white w-2/3 font-bold text-left flex items-center pt-4"
             onClick={handleHomeClick}
           >
             CONVERGE
