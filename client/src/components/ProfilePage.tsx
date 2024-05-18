@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileForm from './ProfileForm';
 import EditProfileForm from './EditProfileForm';
+import CreateListingForm from './CreateListingForm';
+import ListingsPage from './ListingsPage';
 
 interface UserProfile {
   username: string;
@@ -15,9 +17,19 @@ interface UserProfile {
   resume: string;
 }
 
+interface Listing {
+  title: string;
+  description: string;
+  people_needed: number;
+  price: number;
+  elo: number;
+}
+
 const ProfilePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isCreatingListing, setIsCreatingListing] = useState<boolean>(false);
+  const [viewListings, setViewListings] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,7 +62,7 @@ const ProfilePage: React.FC = () => {
     fetchProfile();
   }, []);
 
-  const handleSave = (updatedProfile: UserProfile) => {
+  const handleSaveProfile = (updatedProfile: UserProfile) => {
     const processedProfile: UserProfile = {
       ...updatedProfile,
       tags: Array.isArray(updatedProfile.tags) ? updatedProfile.tags : (updatedProfile.tags[0] as string).split(','),
@@ -59,8 +71,21 @@ const ProfilePage: React.FC = () => {
     setIsEditing(false);
   };
 
+  const handleSaveListing = (newListing: Listing) => {
+    // Handle saving the new listing
+    setIsCreatingListing(false);
+  };
+
   const handleEditClick = () => {
     setIsEditing(true);
+  };
+
+  const handleCreateListingClick = () => {
+    setIsCreatingListing(true);
+  };
+
+  const handleViewListingsClick = () => {
+    setViewListings(true);
   };
 
   const handleLogout = async () => {
@@ -87,11 +112,19 @@ const ProfilePage: React.FC = () => {
   const isProfileComplete = userProfile.name && userProfile.surname && userProfile.email && userProfile.age;
 
   if (!isProfileComplete) {
-    return <ProfileForm userProfile={userProfile} onSave={handleSave} onLogout={handleLogout} />;
+    return <ProfileForm userProfile={userProfile} onSave={handleSaveProfile} onLogout={handleLogout} />;
   }
 
   if (isEditing) {
-    return <EditProfileForm userProfile={userProfile} onSave={handleSave} />;
+    return <EditProfileForm userProfile={userProfile} onSave={handleSaveProfile} />;
+  }
+
+  if (isCreatingListing) {
+    return <CreateListingForm onSave={handleSaveListing} />;
+  }
+
+  if (viewListings) {
+    return <ListingsPage />;
   }
 
   return (
@@ -115,6 +148,8 @@ const ProfilePage: React.FC = () => {
         )}
       </p>
       <button onClick={handleEditClick}>Edit Profile</button>
+      <button onClick={handleCreateListingClick}>Create Listing</button>
+      <button onClick={handleViewListingsClick}>View Listings</button>
       <button onClick={handleLogout}>Logout</button>
     </div>
   );
