@@ -125,7 +125,7 @@ def login():
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred during login'}}), 500
 
-#update profile
+
 @app.route('/api/profile', methods=['POST'])
 def update_profile():
     try:
@@ -156,7 +156,19 @@ def update_profile():
 
         db.session.commit()
 
-        return jsonify({'message': 'Profile updated successfully'}), 200
+        user_data = {
+            'username': user.username,
+            'name': user.name,
+            'surname': user.surname,
+            'email': user.email,
+            'age': user.age,
+            'tags': user.tags,
+            'headline': user.headline,
+            'bio': user.bio,
+            'resume': user.resume
+        }
+
+        return jsonify({'message': 'Profile updated successfully', 'user': user_data}), 200
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred during profile update'}}), 500

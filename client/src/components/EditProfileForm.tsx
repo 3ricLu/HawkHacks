@@ -24,7 +24,6 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ userProfile, onSave }
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('EditProfileForm received userProfile:', userProfile);
     setFormData(userProfile);
   }, [userProfile]);
 
@@ -70,7 +69,11 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ userProfile, onSave }
         const data = await response.json();
         setSuccess('Profile updated successfully!');
         setErrors({});
-        onSave(formData);
+        const updatedProfile: UserProfile = {
+          ...data.user,
+          tags: data.user.tags[0].split(','), // Ensure tags are split correctly
+        };
+        onSave(updatedProfile); // Call onSave with the updated profile data
       } else {
         const errorData = await response.json();
         setErrors(errorData.errors || { general: 'An error occurred during profile update' });

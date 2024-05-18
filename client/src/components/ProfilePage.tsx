@@ -29,9 +29,13 @@ const ProfilePage: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched profile data:', data);
-          const userProfileData = {
+
+          // Ensure tags is an array of strings
+          const tagsArray = Array.isArray(data.user.tags) ? data.user.tags[0].split(',') : [];
+
+          const userProfileData: UserProfile = {
             ...data.user,
-            tags: data.user.tags[0].split(','), // Split the tags string into an array
+            tags: tagsArray, // Split the tags string into an array
           };
           console.log('Processed profile data:', userProfileData);
           setUserProfile(userProfileData);
@@ -50,7 +54,11 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSave = (updatedProfile: UserProfile) => {
-    setUserProfile(updatedProfile);
+    const processedProfile: UserProfile = {
+      ...updatedProfile,
+      tags: Array.isArray(updatedProfile.tags) ? updatedProfile.tags : (updatedProfile.tags[0] as string).split(','),
+    };
+    setUserProfile(processedProfile);
     setIsEditing(false);
   };
 
