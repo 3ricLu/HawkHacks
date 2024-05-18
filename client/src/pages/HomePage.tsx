@@ -1,5 +1,5 @@
-import Navigation from "../components/Navigation.tsx";
-import RegistrationForm from "../components/RegistrationForm.tsx";
+import Navigation from "../components/Navigation";
+import RegistrationForm from "../components/RegistrationForm";
 import("../App.css");
 export default function HomePage() {
   return (
