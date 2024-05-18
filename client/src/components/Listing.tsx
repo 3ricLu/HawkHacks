@@ -34,7 +34,7 @@ const Listing: React.FC<ListingProps> = ({
         <div className="placeholder"></div>
         <FontAwesomeIcon
           icon={faRightToBracket}
-          className="join-icon w-6 h-6 pr-5 pt-5 justify-self-end text-white"
+          className="join-icon w-6 h-6 pr-5 pt-5 justify-self-end text-white hover:cursor-pointer"
         />
       </div>
       {elo < 1000 && (
