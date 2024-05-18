@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import EditProfileForm from './EditProfileForm'; // Import EditProfileForm
+import { useNavigate } from 'react-router-dom';
+import ProfileForm from './ProfileForm';
+import EditProfileForm from './EditProfileForm';
 
 interface UserProfile {
   username: string;
@@ -16,6 +18,7 @@ interface UserProfile {
 const ProfilePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -46,8 +49,32 @@ const ProfilePage: React.FC = () => {
     setIsEditing(false);
   };
 
-  if (!userProfile) {
-    return <div>Loading...</div>;
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        sessionStorage.removeItem('user');
+        navigate('/login');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+    }
+  };
+
+  
+
+  if (!userProfile || !userProfile.name || !userProfile.surname || !userProfile.email || !userProfile.age || !userProfile.headline || !userProfile.bio) {
+    return (
+      <div>
+        <h1>Complete Your Profile</h1>
+        <ProfileForm onLogout={handleLogout} />
+      </div>
+    );
   }
 
   if (isEditing) {
@@ -75,6 +102,8 @@ const ProfilePage: React.FC = () => {
         )}
       </p>
       <button onClick={handleEditClick}>Edit Profile</button>
+      <button onClick={handleLogout}>Logout</button>
+      
     </div>
   );
 };

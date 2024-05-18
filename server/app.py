@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -25,6 +25,20 @@ db = SQLAlchemy(app)
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
+# Serve files from the uploads directory
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+
+
+#logging out
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'message': 'Logout successful'}), 200
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -40,6 +54,18 @@ class User(db.Model):
 
 with app.app_context():
     db.create_all()
+
+#delete all data
+@app.route('/api/delete-all-users', methods=['POST'])
+def delete_all_users():
+    try:
+        db.session.query(User).delete()
+        db.session.commit()
+        return jsonify({'message': 'All user data deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error: {e}")
+        return jsonify({'errors': {'general': 'An error occurred while deleting data'}}), 500
 
 
 # Create account endpoint

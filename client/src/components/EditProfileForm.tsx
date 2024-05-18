@@ -75,6 +75,12 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ userProfile, onSave }
     }
   };
 
+  const allTags = [
+    "Front-end", "Back-end", "Full-Stack", "CyberSecurity", "UI/UX", 
+    "Finance", "Accounting", "HR", "Operations", "Marketing", 
+    "Health", "Physical Labour"
+  ];
+
   return (
     <form onSubmit={handleSubmit}>
       <input
@@ -119,25 +125,17 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ userProfile, onSave }
         placeholder="Bio"
       />
       <div>
-        <label>
-          <input
-            type="checkbox"
-            value="Front-end"
-            checked={formData.tags.includes('Front-end')}
-            onChange={handleCheckboxChange}
-          />
-          Front-end
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Back-end"
-            checked={formData.tags.includes('Back-end')}
-            onChange={handleCheckboxChange}
-          />
-          Back-end
-        </label>
-        {/* Add other checkboxes as needed */}
+        {allTags.map(tag => (
+          <label key={tag}>
+            <input
+              type="checkbox"
+              value={tag}
+              checked={formData.tags.includes(tag)}
+              onChange={handleCheckboxChange}
+            />
+            {tag}
+          </label>
+        ))}
       </div>
       <input
         type="file"
