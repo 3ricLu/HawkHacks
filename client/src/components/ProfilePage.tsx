@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfileForm from './ProfileForm';
 import EditProfileForm from './EditProfileForm';
 
 interface UserProfile {
@@ -29,7 +28,13 @@ const ProfilePage: React.FC = () => {
         });
         if (response.ok) {
           const data = await response.json();
-          setUserProfile(data.user);
+          console.log('Fetched profile data:', data);
+          const userProfileData = {
+            ...data.user,
+            tags: data.user.tags[0].split(','), // Split the tags string into an array
+          };
+          console.log('Processed profile data:', userProfileData);
+          setUserProfile(userProfileData);
         } else {
           console.error('Failed to fetch profile');
         }
@@ -66,18 +71,12 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  
-
-  if (!userProfile || !userProfile.name || !userProfile.surname || !userProfile.email || !userProfile.age || !userProfile.headline || !userProfile.bio) {
-    return (
-      <div>
-        <h1>Complete Your Profile</h1>
-        <ProfileForm onLogout={handleLogout} />
-      </div>
-    );
+  if (!userProfile) {
+    return <div>Loading...</div>;
   }
 
   if (isEditing) {
+    console.log('Editing profile with data:', userProfile);
     return <EditProfileForm userProfile={userProfile} onSave={handleSave} />;
   }
 
@@ -103,7 +102,6 @@ const ProfilePage: React.FC = () => {
       </p>
       <button onClick={handleEditClick}>Edit Profile</button>
       <button onClick={handleLogout}>Logout</button>
-      
     </div>
   );
 };
