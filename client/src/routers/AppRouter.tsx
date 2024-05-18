@@ -6,6 +6,7 @@ import LoginPage from "../pages/LoginPage";
 import ListingsPage from "../pages/ListingsPage";
 import GroupPage from "../pages/GroupPage";
 import ProfilePage from "../pages/ProfilePage";
+import EditProfilePage from "../pages/EditProfilePage";
 
 function AppRouter() {
   // Setting the default title
@@ -17,6 +18,7 @@ function AppRouter() {
         <Route path="/listing" element={<ListingsPage />} />
         <Route path="/group" element={<GroupPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/edit-profile" element={<EditProfilePage/>}/>
       </Routes>
     </BrowserRouter>
   );
