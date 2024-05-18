@@ -19,13 +19,23 @@ interface ProfileFormProps {
 }
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout }) => {
-  const [formData, setFormData] = useState<UserProfile>(userProfile);
+  const [formData, setFormData] = useState<UserProfile>({
+    ...userProfile,
+    age: userProfile.age || 0, // Ensure age is a number
+    tags: userProfile.tags || [],
+    resume: userProfile.resume || '',
+  });
   const [resume, setResume] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    setFormData(userProfile);
+    setFormData({
+      ...userProfile,
+      age: userProfile.age || 0,
+      tags: userProfile.tags || [],
+      resume: userProfile.resume || '',
+    });
   }, [userProfile]);
 
   const handleChange = (
@@ -72,7 +82,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
         setErrors({});
         onSave({
           ...formData,
-          tags: formData.tags, // Ensure tags are passed correctly
+          tags: formData.tags,
         });
       } else {
         const errorData = await response.json();
@@ -109,7 +119,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
       <input
         type="number"
         name="age"
-        value={formData.age}
+        value={formData.age.toString()}
         onChange={handleChange}
         placeholder="Age"
       />

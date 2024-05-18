@@ -7,6 +7,8 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 from flask_session import Session
+from flask_migrate import Migrate
+
 
 load_dotenv()
 
@@ -20,7 +22,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'  # Folder to store uploaded resumes
 Session(app)
 
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 # Create the uploads directory if it does not exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -52,6 +54,20 @@ class User(db.Model):
     bio = db.Column(db.Text)
     resume = db.Column(db.String(255))  # Path to the uploaded resume file
 
+
+class Listing(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    people_needed = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    elo = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    user = db.relationship('User', backref=db.backref('listings', lazy=True))
+
+
+
 with app.app_context():
     db.create_all()
 
@@ -66,6 +82,68 @@ def delete_all_users():
         db.session.rollback()
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred while deleting data'}}), 500
+
+
+
+
+
+
+#create a listing --------------------------
+@app.route('/api/listings', methods=['POST'])
+def create_listing():
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'errors': {'general': 'User not authenticated'}}), 401
+
+        data = request.get_json()
+        app.logger.info(f"Received listing data: {data}")
+
+        required_fields = ['title', 'description', 'people_needed', 'price', 'elo']
+        missing_fields = [field for field in required_fields if field not in data or not data[field]]
+
+        if missing_fields:
+            return jsonify({'errors': {field: f'{field} is required' for field in missing_fields}}), 400
+
+        new_listing = Listing(
+            title=data['title'],
+            description=data['description'],
+            people_needed=int(data['people_needed']),
+            price=int(data['price']),
+            elo=int(data['elo']),
+            user_id=user_id
+        )
+
+        db.session.add(new_listing)
+        db.session.commit()
+
+        return jsonify({'message': 'Listing created successfully', 'listing': new_listing.id}), 201
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({'errors': {'general': 'An error occurred while creating the listing'}}), 500
+    
+#get all listing ---------------------
+@app.route('/api/listings', methods=['GET'])
+def get_listings():
+    try:
+        listings = Listing.query.all()
+        listings_data = [
+            {
+                'id': listing.id,
+                'title': listing.title,
+                'description': listing.description,
+                'people_needed': listing.people_needed,
+                'price': listing.price,
+                'elo': listing.elo,
+                'user_id': listing.user_id,
+            }
+            for listing in listings
+        ]
+        return jsonify({'listings': listings_data}), 200
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({'errors': {'general': 'An error occurred while fetching listings'}}), 500
+
 
 
 # Create account endpoint
