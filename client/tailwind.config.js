@@ -13,9 +13,9 @@ export default {
       blue: "#1fb6ff",
       pink: "#ff49db",
       orange: "#ff7849",
-      green: "#13ce66",
-      red: "#d1001f",
-      yellow: "#e5de00",
+      green: "#C5FFC3",
+      red: "#FFC3C3",
+      yellow: "#FFFDC3",
       gray: {
         100: "#302D37",
         200: "#211A1D",
