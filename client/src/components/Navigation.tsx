@@ -3,9 +3,9 @@ import logo from "../assets/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons";
-import { faCirclePlay } from "@fortawesome/free-solid-svg-icons";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import("../App.css");
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const Navigation = () => {
         <div className="nav-bar-middle flex flex-col items-center">
           <button
             className={`btn-default h-9 flex rounded-xl w-4/5 items-left mb-5 ${
-              currentPath == "/live"
+              currentPath == "/listing"
                 ? "bg-purple-100 hover:bg-purple-200"
                 : "bg-gray-100 hover:bg-gray-300"
             }`}
@@ -61,7 +61,7 @@ const Navigation = () => {
           >
             <div className="flex flex-row justify-center items-center h-full">
               <FontAwesomeIcon
-                icon={faCirclePlay}
+                icon={faMagnifyingGlass}
                 className="object-contain h-2/4 w-5 text-white p-4"
               />
               <div className="flex btn-text text-white h-8 font-bold items-center text-base lg:text-xl sm:text-sm">
@@ -71,7 +71,7 @@ const Navigation = () => {
           </button>
           <button
             className={`btn-default h-9 flex rounded-xl w-4/5 items-left mb-5 ${
-              currentPath == "/live"
+              currentPath == "/group"
                 ? "bg-purple-100 hover:bg-purple-200"
                 : "bg-gray-100 hover:bg-gray-300"
             }`}
@@ -79,7 +79,7 @@ const Navigation = () => {
           >
             <div className="flex flex-row justify-center items-center h-full">
               <FontAwesomeIcon
-                icon={faCirclePlay}
+                icon={faUserGroup}
                 className="object-contain h-2/4 w-5 text-white p-4"
               />
               <div className="flex btn-text text-white h-8 font-bold items-center text-base lg:text-xl sm:text-sm">

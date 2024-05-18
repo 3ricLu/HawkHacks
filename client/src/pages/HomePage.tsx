@@ -1,5 +1,5 @@
 import Navigation from "../components/Navigation.tsx";
-
+import("../App.css");
 export default function HomePage() {
   return (
     <div className="App flex flex-row h-screen">
