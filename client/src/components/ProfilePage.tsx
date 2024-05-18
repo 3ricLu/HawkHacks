@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ProfileForm from './ProfileForm';
 import EditProfileForm from './EditProfileForm';
 
 interface UserProfile {
@@ -49,10 +50,6 @@ const ProfilePage: React.FC = () => {
     fetchProfile();
   }, []);
 
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
   const handleSave = (updatedProfile: UserProfile) => {
     const processedProfile: UserProfile = {
       ...updatedProfile,
@@ -60,6 +57,10 @@ const ProfilePage: React.FC = () => {
     };
     setUserProfile(processedProfile);
     setIsEditing(false);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
   };
 
   const handleLogout = async () => {
@@ -83,8 +84,13 @@ const ProfilePage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
+  const isProfileComplete = userProfile.name && userProfile.surname && userProfile.email && userProfile.age;
+
+  if (!isProfileComplete) {
+    return <ProfileForm userProfile={userProfile} onSave={handleSave} onLogout={handleLogout} />;
+  }
+
   if (isEditing) {
-    console.log('Editing profile with data:', userProfile);
     return <EditProfileForm userProfile={userProfile} onSave={handleSave} />;
   }
 
