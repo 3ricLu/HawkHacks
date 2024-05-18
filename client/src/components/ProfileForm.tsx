@@ -1,22 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface UserProfile {
+  username: string;
+  name: string;
+  surname: string;
+  email: string;
+  age: number;
+  tags: string[];
+  headline: string;
+  bio: string;
+  resume: string;
+}
 
 interface ProfileFormProps {
+  userProfile: UserProfile;
+  onSave: (updatedProfile: UserProfile) => void;
   onLogout: () => void;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ onLogout }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
-    email: '',
-    age: '',
-    headline: '',
-    bio: '',
-  });
-  const [tags, setTags] = useState<string[]>([]);
+const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout }) => {
+  const [formData, setFormData] = useState<UserProfile>(userProfile);
   const [resume, setResume] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFormData(userProfile);
+  }, [userProfile]);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -28,9 +38,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onLogout }) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
     if (checked) {
-      setTags([...tags, value]);
+      setFormData({ ...formData, tags: [...formData.tags, value] });
     } else {
-      setTags(tags.filter((tag) => tag !== value));
+      setFormData({ ...formData, tags: formData.tags.filter(tag => tag !== value) });
     }
   };
 
@@ -42,15 +52,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onLogout }) => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const adjustedFormData = {
-      ...formData,
-      age: parseInt(formData.age, 10),
-      tags: tags, // Use the tags array
-    };
-
     const formDataObject = new FormData();
-    for (const key in adjustedFormData) {
-      formDataObject.append(key, (adjustedFormData as any)[key]);
+    for (const key in formData) {
+      formDataObject.append(key, (formData as any)[key]);
     }
     if (resume) {
       formDataObject.append('resume', resume);
@@ -63,8 +67,13 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onLogout }) => {
       });
 
       if (response.ok) {
+        const data = await response.json();
         setSuccess('Profile updated successfully!');
         setErrors({});
+        onSave({
+          ...formData,
+          tags: formData.tags, // Ensure tags are passed correctly
+        });
       } else {
         const errorData = await response.json();
         setErrors(errorData.errors || { general: 'An error occurred during profile update' });
@@ -118,102 +127,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onLogout }) => {
         placeholder="Bio"
       />
       <div>
-        <label>
-          <input
-            type="checkbox"
-            value="Front-end"
-            onChange={handleCheckboxChange}
-          />
-          Front-end
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Back-end"
-            onChange={handleCheckboxChange}
-          />
-          Back-end
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Full-Stack"
-            onChange={handleCheckboxChange}
-          />
-          Full-Stack
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="CyberSecurity"
-            onChange={handleCheckboxChange}
-          />
-          CyberSecurity
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="UI/UX"
-            onChange={handleCheckboxChange}
-          />
-          UI/UX
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Finance"
-            onChange={handleCheckboxChange}
-          />
-          Finance
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Accounting"
-            onChange={handleCheckboxChange}
-          />
-          Accounting
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="HR"
-            onChange={handleCheckboxChange}
-          />
-          HR
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Operations"
-            onChange={handleCheckboxChange}
-          />
-          Operations
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Marketing"
-            onChange={handleCheckboxChange}
-          />
-          Marketing
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Health"
-            onChange={handleCheckboxChange}
-          />
-          Health
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="Physical Labour"
-            onChange={handleCheckboxChange}
-          />
-          Physical Labour
-        </label>
+        {['Front-end', 'Back-end', 'Full-Stack', 'CyberSecurity', 'UI/UX', 'Finance', 'Accounting', 'HR', 'Operations', 'Marketing', 'Health', 'Physical Labour'].map(tag => (
+          <label key={tag}>
+            <input
+              type="checkbox"
+              value={tag}
+              checked={formData.tags.includes(tag)}
+              onChange={handleCheckboxChange}
+            />
+            {tag}
+          </label>
+        ))}
       </div>
       <input
         type="file"
@@ -224,8 +148,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onLogout }) => {
 
       {errors.general && <p className="error">{errors.general}</p>}
 
-      <button type="submit">Update Profile</button>
-
+      <button type="submit">Save</button>
       <button type="button" onClick={onLogout}>Logout</button>
 
       {success && <p className="success">{success}</p>}
