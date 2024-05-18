@@ -6,11 +6,14 @@ const RegistrationForm: React.FC = () => {
         username: '',
         password: '',
         name: '',
+        surname: '',
+        email: '',
         age: '',
-        tags: '',
+        headline: '',
         bio: '',
     });
-
+    const [tags, setTags] = useState<string[]>([]);
+    const [resume, setResume] = useState<File | null>(null);
     const [errors, setErrors] = useState<{[key: string]: string}>({});
     const [success, setSuccess] = useState<string | null>(null);
 
@@ -19,27 +22,47 @@ const RegistrationForm: React.FC = () => {
         setFormData({ ...formData, [name]: value });
     };
 
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = event.target;
+        if (checked) {
+            setTags([...tags, value]);
+        } else {
+            setTags(tags.filter(tag => tag !== value));
+        }
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setResume(event.target.files[0]);
+        }
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const adjustedFormData = {
             ...formData,
-            age: parseInt(formData.age, 10),  // Ensure age is an integer
-            tags: formData.tags.split(',').map(tag => tag.trim()),  // Adjust tags to be an array
+            age: parseInt(formData.age, 10),
+            tags: tags,  // Use the tags array
         };
-        console.log('Submitting data:', adjustedFormData); // Log the data being submitted
+
+        const formDataObject = new FormData();
+        for (const key in adjustedFormData) {
+            formDataObject.append(key, (adjustedFormData as any)[key]);
+        }
+        if (resume) {
+            formDataObject.append('resume', resume);
+        }
 
         try {
             const response = await fetch('/api/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(adjustedFormData),
+                body: formDataObject,
             });
 
             if (response.ok) {
                 console.log('Registration successful');
                 setSuccess('Registration successful! You can now log in.');
                 setErrors({});
-                // Optionally redirect to login or another page
             } else {
                 const errorData = await response.json();
                 console.log('Error data:', errorData); // Log the error data for debugging
@@ -75,6 +98,20 @@ const RegistrationForm: React.FC = () => {
                 placeholder="Name"
             />
             <input
+                type="text"
+                name="surname"
+                value={formData.surname}
+                onChange={handleChange}
+                placeholder="Surname"
+            />
+            <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+            />
+            <input
                 type="number"
                 name="age"
                 value={formData.age}
@@ -83,17 +120,120 @@ const RegistrationForm: React.FC = () => {
             />
             <input
                 type="text"
-                name="tags"
-                value={formData.tags}
+                name="headline"
+                value={formData.headline}
                 onChange={handleChange}
-                placeholder="Tags (comma-separated)"
+                placeholder="Headline"
             />
-            <input
-                type="text"
+            <textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Bio"
+            />
+            <div>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Front-end"
+                        onChange={handleCheckboxChange}
+                    />
+                    Front-end
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Back-end"
+                        onChange={handleCheckboxChange}
+                    />
+                    Back-end
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Full-Stack"
+                        onChange={handleCheckboxChange}
+                    />
+                    Full-Stack
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="CyberSecurity"
+                        onChange={handleCheckboxChange}
+                    />
+                    CyberSecurity
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="UI/UX"
+                        onChange={handleCheckboxChange}
+                    />
+                    UI/UX
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Finance"
+                        onChange={handleCheckboxChange}
+                    />
+                    Finance
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Accounting"
+                        onChange={handleCheckboxChange}
+                    />
+                    Accounting
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="HR"
+                        onChange={handleCheckboxChange}
+                    />
+                    HR
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Operations"
+                        onChange={handleCheckboxChange}
+                    />
+                    Operations
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Marketing"
+                        onChange={handleCheckboxChange}
+                    />
+                    Marketing
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Health"
+                        onChange={handleCheckboxChange}
+                    />
+                    Health
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        value="Physical Labour"
+                        onChange={handleCheckboxChange}
+                    />
+                    Physical Labour
+                </label>
+            </div>
+            <input
+                type="file"
+                name="resume"
+                onChange={handleFileChange}
+                placeholder="Resume Upload"
             />
 
             {errors.username && <p className="error">{errors.username}</p>}
