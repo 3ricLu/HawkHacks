@@ -47,7 +47,7 @@ const Navigation = () => {
             className="text-base sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl text-white w-2/3 font-bold text-left flex items-center"
             onClick={handleHomeClick}
           >
-            SYNKER
+            CONVERGE
           </p>
         </div>
         <div className="nav-bar-middle flex flex-col items-center">
