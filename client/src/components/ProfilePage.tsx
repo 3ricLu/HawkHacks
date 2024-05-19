@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ProfileForm from './ProfileForm';
-import EditProfileForm from './EditProfileForm';
-import CreateListingForm from './CreateListingForm';
-import ListingsPage from './ListingsPage';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import ProfileForm from "./ProfileForm";
+import EditProfileForm from "./EditProfileForm";
+import CreateListingForm from "./CreateListingForm";
+import ListingsPage from "./ListingsPage";
+import logo from "../assets/logo.png";
 
 interface UserProfile {
   username: string;
@@ -35,28 +36,30 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/profile', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("/api/profile", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
           const data = await response.json();
-          console.log('Fetched profile data:', data);
+          console.log("Fetched profile data:", data);
 
           // Ensure tags is an array of strings
-          const tagsArray = Array.isArray(data.user.tags) ? data.user.tags[0].split(',') : [];
+          const tagsArray = Array.isArray(data.user.tags)
+            ? data.user.tags[0].split(",")
+            : [];
 
           const userProfileData: UserProfile = {
             ...data.user,
             tags: tagsArray, // Split the tags string into an array
           };
-          console.log('Processed profile data:', userProfileData);
+          console.log("Processed profile data:", userProfileData);
           setUserProfile(userProfileData);
         } else {
-          console.error('Failed to fetch profile');
+          console.error("Failed to fetch profile");
         }
       } catch (error) {
-        console.error('Network error:', error);
+        console.error("Network error:", error);
       }
     };
     fetchProfile();
@@ -65,7 +68,9 @@ const ProfilePage: React.FC = () => {
   const handleSaveProfile = (updatedProfile: UserProfile) => {
     const processedProfile: UserProfile = {
       ...updatedProfile,
-      tags: Array.isArray(updatedProfile.tags) ? updatedProfile.tags : (updatedProfile.tags[0] as string).split(','),
+      tags: Array.isArray(updatedProfile.tags)
+        ? updatedProfile.tags
+        : (updatedProfile.tags[0] as string).split(","),
     };
     setUserProfile(processedProfile);
     setIsEditing(false);
@@ -90,33 +95,53 @@ const ProfilePage: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
       if (response.ok) {
-        sessionStorage.removeItem('user');
-        navigate('/login');
+        sessionStorage.removeItem("user");
+        navigate("/login");
       } else {
-        console.error('Logout failed');
+        console.error("Logout failed");
       }
     } catch (error) {
-      console.error('Network error:', error);
+      console.error("Network error:", error);
     }
   };
 
   if (!userProfile) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-screen-container w-screen h-screen bg-purple-200 items-center">
+        <img
+          className="logo object-scale-down w-1/3 pt-10"
+          src={logo}
+          alt="Converge Logo"
+        />
+      </div>
+    );
   }
 
-  const isProfileComplete = userProfile.name && userProfile.surname && userProfile.email && userProfile.age;
+  const isProfileComplete =
+    userProfile.name &&
+    userProfile.surname &&
+    userProfile.email &&
+    userProfile.age;
 
   if (!isProfileComplete) {
-    return <ProfileForm userProfile={userProfile} onSave={handleSaveProfile} onLogout={handleLogout} />;
+    return (
+      <ProfileForm
+        userProfile={userProfile}
+        onSave={handleSaveProfile}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   if (isEditing) {
-    return <EditProfileForm userProfile={userProfile} onSave={handleSaveProfile} />;
+    return (
+      <EditProfileForm userProfile={userProfile} onSave={handleSaveProfile} />
+    );
   }
 
   if (isCreatingListing) {
@@ -137,14 +162,19 @@ const ProfilePage: React.FC = () => {
       <p>Age: {userProfile.age}</p>
       <p>Headline: {userProfile.headline}</p>
       <p>Bio: {userProfile.bio}</p>
-      <p>Tags: {userProfile.tags.join(', ')}</p>
+      <p>Tags: {userProfile.tags.join(", ")}</p>
       <p>
-        Resume: {userProfile.resume ? (
-          <a href={`/uploads/${userProfile.resume}`} target="_blank" rel="noopener noreferrer">
+        Resume:{" "}
+        {userProfile.resume ? (
+          <a
+            href={`/uploads/${userProfile.resume}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Download
           </a>
         ) : (
-          'No resume uploaded'
+          "No resume uploaded"
         )}
       </p>
       <button onClick={handleEditClick}>Edit Profile</button>

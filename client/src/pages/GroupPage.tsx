@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navigation from "../components/Navigation";
 import Listing from "../components/Listing";
+import logo from "../assets/logo.png";
 
 interface Listing {
   title: string;
@@ -63,12 +64,17 @@ export default function GroupPage() {
         // Refetch the updated listings after a successful join
         const updatedListingsResponse = await fetch("/api/listings");
         const updatedListingsData = await updatedListingsResponse.json();
-        console.log("Updated listings after join:", updatedListingsData.listings);
+        console.log(
+          "Updated listings after join:",
+          updatedListingsData.listings
+        );
 
-        const sanitizedListings = updatedListingsData.listings.map((listing: Listing) => ({
-          ...listing,
-          members: listing.members || [],
-        }));
+        const sanitizedListings = updatedListingsData.listings.map(
+          (listing: Listing) => ({
+            ...listing,
+            members: listing.members || [],
+          })
+        );
         setListings(sanitizedListings);
         console.log("State updated with new listings:", sanitizedListings);
       } else {
@@ -80,7 +86,15 @@ export default function GroupPage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-screen-container w-screen h-screen bg-purple-200 items-center">
+        <img
+          className="logo object-scale-down w-1/3 h-1/3 pt-10"
+          src={logo}
+          alt="Converge Logo"
+        />
+      </div>
+    );
   }
 
   return (
@@ -95,7 +109,11 @@ export default function GroupPage() {
         <div className="listings-container h-4/5 w-fill bg-gray-100 align-bottom grid grid-cols-3 justify-center">
           {listings.map((listing) => (
             <div key={listing.listingID} className="m-2">
-              <Listing {...listing} onJoin={handleJoin} currentUser={currentUser} />
+              <Listing
+                {...listing}
+                onJoin={handleJoin}
+                currentUser={currentUser}
+              />
             </div>
           ))}
         </div>

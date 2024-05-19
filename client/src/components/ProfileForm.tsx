@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface UserProfile {
   username: string;
@@ -18,12 +18,16 @@ interface ProfileFormProps {
   onLogout: () => void;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout }) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({
+  userProfile,
+  onSave,
+  onLogout,
+}) => {
   const [formData, setFormData] = useState<UserProfile>({
     ...userProfile,
     age: userProfile.age || 0, // Ensure age is a number
     tags: userProfile.tags || [],
-    resume: userProfile.resume || '',
+    resume: userProfile.resume || "",
   });
   const [resume, setResume] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -34,7 +38,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
       ...userProfile,
       age: userProfile.age || 0,
       tags: userProfile.tags || [],
-      resume: userProfile.resume || '',
+      resume: userProfile.resume || "",
     });
   }, [userProfile]);
 
@@ -50,7 +54,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
     if (checked) {
       setFormData({ ...formData, tags: [...formData.tags, value] });
     } else {
-      setFormData({ ...formData, tags: formData.tags.filter(tag => tag !== value) });
+      setFormData({
+        ...formData,
+        tags: formData.tags.filter((tag) => tag !== value),
+      });
     }
   };
 
@@ -67,18 +74,18 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
       formDataObject.append(key, (formData as any)[key]);
     }
     if (resume) {
-      formDataObject.append('resume', resume);
+      formDataObject.append("resume", resume);
     }
 
     try {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
+      const response = await fetch("/api/profile", {
+        method: "POST",
         body: formDataObject,
       });
 
       if (response.ok) {
         const data = await response.json();
-        setSuccess('Profile updated successfully!');
+        setSuccess("Profile updated successfully!");
         setErrors({});
         onSave({
           ...formData,
@@ -86,10 +93,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
         });
       } else {
         const errorData = await response.json();
-        setErrors(errorData.errors || { general: 'An error occurred during profile update' });
+        setErrors(
+          errorData.errors || {
+            general: "An error occurred during profile update",
+          }
+        );
       }
     } catch (error) {
-      setErrors({ general: 'Network error. Please try again.' });
+      setErrors({ general: "Network error. Please try again." });
     }
   };
 
@@ -137,7 +148,20 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
         placeholder="Bio"
       />
       <div>
-        {['Front-end', 'Back-end', 'Full-Stack', 'CyberSecurity', 'UI/UX', 'Finance', 'Accounting', 'HR', 'Operations', 'Marketing', 'Health', 'Physical Labour'].map(tag => (
+        {[
+          "Front-end",
+          "Back-end",
+          "Full-Stack",
+          "CyberSecurity",
+          "UI/UX",
+          "Finance",
+          "Accounting",
+          "HR",
+          "Operations",
+          "Marketing",
+          "Health",
+          "Physical Labour",
+        ].map((tag) => (
           <label key={tag}>
             <input
               type="checkbox"
@@ -159,7 +183,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userProfile, onSave, onLogout
       {errors.general && <p className="error">{errors.general}</p>}
 
       <button type="submit">Save</button>
-      <button type="button" onClick={onLogout}>Logout</button>
+      <button type="button" onClick={onLogout}>
+        Logout
+      </button>
 
       {success && <p className="success">{success}</p>}
     </form>

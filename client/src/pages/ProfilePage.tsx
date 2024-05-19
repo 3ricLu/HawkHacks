@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import Navigation from "../components/Navigation";
+import logo from "../assets/logo.png";
 
 interface UserProfile {
   username: string;
@@ -21,28 +22,44 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/profile', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include' // Ensure cookies are included
+        const response = await fetch("/api/profile", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // Ensure cookies are included
         });
         if (response.ok) {
           const data = await response.json();
-          const tagsArray = Array.isArray(data.user.tags) ? data.user.tags[0].split(',') : [];
-          const userProfileData: UserProfile = { ...data.user, tags: tagsArray };
+          const tagsArray = Array.isArray(data.user.tags)
+            ? data.user.tags[0].split(",")
+            : [];
+          const userProfileData: UserProfile = {
+            ...data.user,
+            tags: tagsArray,
+          };
           setUserProfile(userProfileData);
         } else {
-          console.error('Failed to fetch profile');
+          console.error("Failed to fetch profile");
         }
       } catch (error) {
-        console.error('Network error:', error);
+        console.error("Network error:", error);
       }
     };
     fetchProfile();
   }, []);
 
   if (!userProfile) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-screen-container w-screen h-screen bg-gray-100 justify-center grid grid-col-1">
+        <img
+          className="logo object-scale-down w-1/5 mt-36 justify-self-center"
+          src={logo}
+          alt="Converge Logo"
+        />
+        <div className="loading-text w-fill h-fill text-7xl font-bold text-white justify-self-center pb-36">
+          Loading...
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -64,7 +81,7 @@ const ProfilePage: React.FC = () => {
             <strong>Age:</strong> {userProfile.age}
           </div>
           <div className="flex flex-col">
-            <strong>Tags:</strong> {userProfile.tags.join(', ')}
+            <strong>Tags:</strong> {userProfile.tags.join(", ")}
           </div>
           <div className="flex flex-col">
             <strong>Headline:</strong> {userProfile.headline}
@@ -85,7 +102,7 @@ const ProfilePage: React.FC = () => {
                   Download
                 </a>
               ) : (
-                'No resume uploaded'
+                "No resume uploaded"
               )}
             </div>
           </div>
