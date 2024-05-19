@@ -305,19 +305,6 @@ def join_listing(listing_id):
         app.logger.error(f"Error: {e}")
         db.session.rollback()
         return jsonify({'errors': {'general': 'An error occurred while joining the listing'}}), 500
-
-
-
-
-
-
-
-
-
-
-    
-
-
 @app.route('/api/profile', methods=['GET'])
 @login_required
 def get_profile():
@@ -343,7 +330,6 @@ def get_profile():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred while fetching profile information'}}), 500
-
 
 @app.route('/api/delete-all-listings', methods=['POST'])
 @login_required

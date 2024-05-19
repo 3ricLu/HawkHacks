@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()  # Initialize the database instance
+db = SQLAlchemy()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -8,5 +8,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(120), nullable=False)
     name = db.Column(db.String(120))
     age = db.Column(db.Integer)
-    tags = db.Column(db.ARRAY(db.String))  
+    tags = db.Column(db.ARRAY(db.String))
     bio = db.Column(db.Text)
+    points = db.Column(db.Integer, default=0)
