@@ -1,5 +1,5 @@
-import Navigation from "../components/Navigation.tsx";
-import Listing from "../components/Listing.tsx";
+import Navigation from "../components/Navigation";
+import Listing from "../components/Listing";
 export default function GroupPage() {
   const mockListings = [
     {
