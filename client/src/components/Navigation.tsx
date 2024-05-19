@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faUserGroup, faUser, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import "../App.css";
-
+import WalletButton from './WalletButton';
 const Navigation = () => {
   const navigate = useNavigate();
   const currentPath = window.location.pathname;
@@ -82,6 +82,9 @@ const Navigation = () => {
               </div>
             </div>
           </button>
+        </div>
+        <div className="wallet-button-container">
+          <WalletButton /> {/* Add the WalletButton component */}
         </div>
       </div>
       <div className="nav-bar-middle-space grow"></div>
