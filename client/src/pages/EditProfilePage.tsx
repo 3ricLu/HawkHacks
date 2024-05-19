@@ -1,7 +1,6 @@
-// client/src/pages/EditProfilePage.tsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navigation from "../components/Navigation";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navigation from '../components/Navigation';
 
 interface ProfileData {
   name: string;
@@ -11,7 +10,7 @@ interface ProfileData {
   tags: string[];
   headline: string;
   bio: string;
-  resume: File | null;
+  resume: File | null | string;
 }
 
 const categories = [
@@ -45,6 +44,28 @@ const EditProfilePage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('/api/profile', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const tagsArray = Array.isArray(data.user.tags) ? data.user.tags[0].split(',') : [];
+          const userProfileData: ProfileData = { ...data.user, tags: tagsArray, resume: data.user.resume || null };
+          setProfile(userProfileData);
+        } else {
+          console.error('Failed to fetch profile');
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -71,11 +92,34 @@ const EditProfilePage: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Process or save profile data
-    console.log(profile);
-    navigate("/profile"); // Navigate back to the profile page after saving
+    const formDataObject = new FormData();
+    for (const key in profile) {
+      if (key !== 'resume') {
+        formDataObject.append(key, (profile as any)[key]);
+      }
+    }
+    if (profile.resume && typeof profile.resume !== 'string') {
+      formDataObject.append('resume', profile.resume);
+    }
+
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        body: formDataObject,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Profile updated successfully:', data);
+        navigate("/profile"); // Navigate back to the profile page after saving
+      } else {
+        console.error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+    }
   };
 
   return (
@@ -175,6 +219,16 @@ const EditProfilePage: React.FC = () => {
               onChange={handleFileChange}
               className="border rounded p-2"
             />
+            {profile.resume && typeof profile.resume === 'string' && (
+              <a
+                href={`/uploads/${profile.resume}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 text-blue-500 underline"
+              >
+                Download current resume
+              </a>
+            )}
           </div>
           <div className="flex flex-row justify-between">
             <button
