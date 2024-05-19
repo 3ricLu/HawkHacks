@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Navigation from "../components/Navigation";
 
 interface ProfileData {
   name: string;
@@ -47,20 +47,26 @@ const EditProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/profile', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("/api/profile", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
           const data = await response.json();
-          const tagsArray = Array.isArray(data.user.tags) ? data.user.tags[0].split(',') : [];
-          const userProfileData: ProfileData = { ...data.user, tags: tagsArray, resume: data.user.resume || null };
+          const tagsArray = Array.isArray(data.user.tags)
+            ? data.user.tags[0].split(",")
+            : [];
+          const userProfileData: ProfileData = {
+            ...data.user,
+            tags: tagsArray,
+            resume: data.user.resume || null,
+          };
           setProfile(userProfileData);
         } else {
-          console.error('Failed to fetch profile');
+          console.error("Failed to fetch profile");
         }
       } catch (error) {
-        console.error('Network error:', error);
+        console.error("Network error:", error);
       }
     };
     fetchProfile();
@@ -96,36 +102,36 @@ const EditProfilePage: React.FC = () => {
     e.preventDefault();
     const formDataObject = new FormData();
     for (const key in profile) {
-      if (key !== 'resume') {
+      if (key !== "resume") {
         formDataObject.append(key, (profile as any)[key]);
       }
     }
-    if (profile.resume && typeof profile.resume !== 'string') {
-      formDataObject.append('resume', profile.resume);
+    if (profile.resume && typeof profile.resume !== "string") {
+      formDataObject.append("resume", profile.resume);
     }
 
     try {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
+      const response = await fetch("/api/profile", {
+        method: "POST",
         body: formDataObject,
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Profile updated successfully:', data);
+        console.log("Profile updated successfully:", data);
         navigate("/profile"); // Navigate back to the profile page after saving
       } else {
-        console.error('Failed to update profile');
+        console.error("Failed to update profile");
       }
     } catch (error) {
-      console.error('Network error:', error);
+      console.error("Network error:", error);
     }
   };
 
   return (
-    <div className="App flex flex-row h-screen">
+    <div className="App flex flex-row h-screen bg-gray-100">
       <Navigation />
-      <div className="home-screen-container flex flex-col w-full h-full overflow-y-scroll p-10">
+      <div className="home-screen-container flex flex-col w-full h-full overflow-y-scroll p-10 text-white">
         <h1 className="text-3xl mb-5">Edit Profile</h1>
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <div className="flex flex-col">
@@ -136,7 +142,7 @@ const EditProfilePage: React.FC = () => {
               name="name"
               value={profile.name}
               onChange={handleChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-9 text-white p-2 mb-2 placeholder-white"
             />
           </div>
           <div className="flex flex-col">
@@ -147,7 +153,7 @@ const EditProfilePage: React.FC = () => {
               name="surname"
               value={profile.surname}
               onChange={handleChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-9 text-white p-2 mb-2 placeholder-white"
             />
           </div>
           <div className="flex flex-col">
@@ -158,7 +164,7 @@ const EditProfilePage: React.FC = () => {
               name="email"
               value={profile.email}
               onChange={handleChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-9 text-white p-2 mb-2 placeholder-white"
             />
           </div>
           <div className="flex flex-col">
@@ -169,7 +175,7 @@ const EditProfilePage: React.FC = () => {
               name="age"
               value={profile.age}
               onChange={handleAgeChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-9 text-white p-2 mb-2 placeholder-white"
             />
           </div>
           <div className="flex flex-col">
@@ -197,7 +203,7 @@ const EditProfilePage: React.FC = () => {
               name="headline"
               value={profile.headline}
               onChange={handleChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-9 text-white p-2 mb-2 placeholder-white"
             />
           </div>
           <div className="flex flex-col">
@@ -207,7 +213,7 @@ const EditProfilePage: React.FC = () => {
               name="bio"
               value={profile.bio}
               onChange={handleChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-24 text-white p-2 mb-2 placeholder-white"
             ></textarea>
           </div>
           <div className="flex flex-col">
@@ -217,9 +223,9 @@ const EditProfilePage: React.FC = () => {
               id="resume"
               name="resume"
               onChange={handleFileChange}
-              className="border rounded p-2"
+              className="border rounded p-2 mb-2 rounded-xl bg-purple-100 h-9 text-white p-2 mb-2 placeholder-white"
             />
-            {profile.resume && typeof profile.resume === 'string' && (
+            {profile.resume && typeof profile.resume === "string" && (
               <a
                 href={`/uploads/${profile.resume}`}
                 target="_blank"

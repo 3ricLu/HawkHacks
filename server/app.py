@@ -77,16 +77,21 @@ class Listing(db.Model):
 with app.app_context():
     db.create_all()
 
-# Delete all data
 @app.route('/api/delete-all-users', methods=['POST'])
 def delete_all_users():
     try:
+        # Delete all listings first to avoid foreign key constraint violations
+        db.session.query(Listing).delete()
+        db.session.commit()
+
+        # Then delete all users
         db.session.query(User).delete()
         db.session.commit()
+
         return jsonify({'message': 'All user data deleted successfully'}), 200
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error: {e}")
+        app.logger.error(f"Error deleting users: {e}")
         return jsonify({'errors': {'general': 'An error occurred while deleting data'}}), 500
 
 
