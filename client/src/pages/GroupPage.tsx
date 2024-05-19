@@ -17,8 +17,19 @@ interface Listing {
 export default function GroupPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<string>("");
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch("/api/profile");
+        const data = await response.json();
+        setCurrentUser(data.user.username);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
     const fetchListings = async () => {
       try {
         const response = await fetch("/api/listings");
@@ -36,6 +47,7 @@ export default function GroupPage() {
       }
     };
 
+    fetchProfile();
     fetchListings();
   }, []);
 
@@ -83,7 +95,7 @@ export default function GroupPage() {
         <div className="listings-container h-4/5 w-fill bg-gray-100 align-bottom grid grid-cols-3 justify-center">
           {listings.map((listing) => (
             <div key={listing.listingID} className="m-2">
-              <Listing {...listing} onJoin={handleJoin} />
+              <Listing {...listing} onJoin={handleJoin} currentUser={currentUser} />
             </div>
           ))}
         </div>

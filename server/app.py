@@ -270,6 +270,11 @@ def join_listing(listing_id):
         username = current_user.username
         app.logger.info(f"User '{username}' is attempting to join listing ID: {listing_id}")
 
+        # Check if the current user is the creator of the listing
+        if current_user.id == listing.user_id:
+            app.logger.warning(f"User '{username}' cannot join their own listing ID: {listing_id}")
+            return jsonify({'errors': {'general': 'You cannot join your own listing'}}), 400
+
         if listing.members is None:
             listing.members = []
 
@@ -310,7 +315,6 @@ def join_listing(listing_id):
 
 
 
-
     
 
 
@@ -341,6 +345,17 @@ def get_profile():
         return jsonify({'errors': {'general': 'An error occurred while fetching profile information'}}), 500
 
 
+@app.route('/api/delete-all-listings', methods=['POST'])
+@login_required
+def delete_all_listings():
+    try:
+        db.session.query(Listing).delete()
+        db.session.commit()
+        return jsonify({'message': 'All listings deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error: {e}")
+        return jsonify({'errors': {'general': 'An error occurred while deleting listings'}}), 500
 # Register user
 @app.route('/api/register', methods=['POST'])
 def register_user():

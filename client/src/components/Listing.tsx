@@ -13,6 +13,7 @@ interface ListingProps {
   listingID: number;
   people_needed: number;
   onJoin: (listingID: number) => void;
+  currentUser: string;
 }
 
 const Listing: React.FC<ListingProps> = ({
@@ -26,10 +27,11 @@ const Listing: React.FC<ListingProps> = ({
   listingID,
   people_needed,
   onJoin,
+  currentUser,
 }) => {
   const handleJoinClick = () => {
     console.log(`Joining listing with ID: ${listingID}, Current members: ${members.length}`);
-    if (members.length < people_needed) {
+    if (members.length < people_needed && currentUser !== listingOwner) {
       onJoin(listingID);
     }
   };
@@ -44,7 +46,7 @@ const Listing: React.FC<ListingProps> = ({
         <FontAwesomeIcon
           icon={faRightToBracket}
           className={`join-icon w-6 h-6 pr-5 pt-5 justify-self-end text-white hover:cursor-pointer ${
-            members.length >= people_needed ? 'opacity-50 cursor-not-allowed' : ''
+            members.length >= people_needed || currentUser === listingOwner ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           onClick={handleJoinClick}
         />
