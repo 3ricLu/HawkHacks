@@ -1,19 +1,10 @@
+// src/pages/ProfilePage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 
-interface ProfileData {
-  name: string;
-  surname: string;
-  email: string;
-  age: number;
-  tags: string[];
-  headline: string;
-  bio: string;
-}
-
 const ProfilePage: React.FC = () => {
-  const profile: ProfileData = {
+  const profile = {
     name: 'John',
     surname: 'Doe',
     email: 'john.doe@example.com',
@@ -50,7 +41,7 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col">
             <strong>Bio:</strong> {profile.bio}
           </div>
-          <Link to="/edit-profile" className="bg-blue-500 text-blue p-2 rounded mt-4 text-center">
+          <Link to="/edit-profile" className="bg-blue-500 text-white p-2 rounded mt-4 text-center">
             Edit Profile
           </Link>
         </div>
