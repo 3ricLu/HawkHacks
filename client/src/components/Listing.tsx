@@ -12,6 +12,8 @@ interface ListingProps {
   members: string[];
   listingOwner: string;
   listingID: number;
+  people_needed: number;
+  onJoin: (listingID: number) => void;
 }
 
 // Create the component
@@ -19,12 +21,20 @@ const Listing: React.FC<ListingProps> = ({
   title,
   price,
   elo,
-  roles,
+  roles = [],
   description,
-  members,
+  members = [],
   listingOwner,
   listingID,
+  people_needed,
+  onJoin,
 }) => {
+  const handleJoinClick = () => {
+    if (members.length < people_needed) {
+      onJoin(listingID);
+    }
+  };
+
   return (
     <div className="listing-container w-80 h-fill mt-2 mx-1 mb-1 bg-gray-200 rounded-3xl">
       <div className="listings-title flex flex-row object-contain justify-between">
@@ -34,7 +44,10 @@ const Listing: React.FC<ListingProps> = ({
         <div className="placeholder"></div>
         <FontAwesomeIcon
           icon={faRightToBracket}
-          className="join-icon w-6 h-6 pr-5 pt-5 justify-self-end text-white hover:cursor-pointer"
+          className={`join-icon w-6 h-6 pr-5 pt-5 justify-self-end text-white hover:cursor-pointer ${
+            members.length >= people_needed ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          onClick={handleJoinClick}
         />
       </div>
       {elo < 1000 && (
@@ -58,7 +71,7 @@ const Listing: React.FC<ListingProps> = ({
       </h1>
       <div className="members-and-price-container w-fill h-10 bg-gray-200 flex justify-between rounded-3xl">
         <h1 className="slots-taken font-bold text-purple-200 px-3 text-xl text-left">
-          {members.length}/{roles.length}
+          {members.length}/{people_needed}
         </h1>
         <div className="placeholder"> </div>
         <h1 className="price font-bold text-purple-200 px-3 text-xl">

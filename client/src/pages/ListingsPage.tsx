@@ -1,53 +1,68 @@
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import Navigation from "../components/Navigation";
-import { useState, ChangeEvent, FormEvent } from "react";
 import "../App.css";
 
-export default function ListingsPage() {
-  const [name, setName] = useState<string>("");
+interface Listing {
+  title: string;
+  description: string;
+  people_needed: number;
+  price: number;
+  elo: number;
+}
+
+const ListingsPage: React.FC = () => {
+  const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [roles, setRoles] = useState<string[]>([]);
-  const [postings, setPostings] = useState<
-    { name: string; description: string; roles: string[]; id: number }[]
-  >([]);
-  const [roleAssignments, setRoleAssignments] = useState<{
-    [key: number]: { role: string; filled: boolean }[];
-  }>({});
-  const [selectedPostingId, setSelectedPostingId] = useState<number | null>(
-    null
-  );
+  const [peopleNeeded, setPeopleNeeded] = useState<number>(0);
+  const [price, setPrice] = useState<number>(0);
+  const [elo, setElo] = useState<number>(0);
+  const [postings, setPostings] = useState<Listing[]>([]);
+  const [selectedPosting, setSelectedPosting] = useState<Listing | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) =>
-    setName(event.target.value);
-  const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) =>
+  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setTitle(event.target.value);
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) =>
     setDescription(event.target.value);
-  const handleRolesChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const rolesArray = event.target.value.split(",").map((role) => role.trim());
-    setRoles(rolesArray);
-  };
+  const handlePeopleNeededChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setPeopleNeeded(Number(event.target.value));
+  const handlePriceChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setPrice(Number(event.target.value));
+  const handleEloChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setElo(Number(event.target.value));
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const newPostingId = postings.length + 1; // simple id generation
-    const newPosting = { name, description, roles, id: newPostingId };
-    setPostings([...postings, newPosting]);
-    // Generate mock role assignments data
-    const newRoleAssignments = roles.map((role) => ({
-      role,
-      filled: Math.random() < 0.5,
-    })); // Randomly decide if a role is filled
-    setRoleAssignments({
-      ...roleAssignments,
-      [newPostingId]: newRoleAssignments,
-    });
+    try {
+      const response = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description, people_needed: peopleNeeded, price, elo }),
+      });
 
-    // Clear the fields after submission
-    setName("");
-    setDescription("");
-    setRoles([]);
+      if (response.ok) {
+        const newPosting: Listing = { title, description, people_needed: peopleNeeded, price, elo };
+        setPostings([...postings, newPosting]);
+        setSuccess("Listing created successfully!");
+        setErrors({});
+        // Clear the form
+        setTitle("");
+        setDescription("");
+        setPeopleNeeded(0);
+        setPrice(0);
+        setElo(0);
+      } else {
+        const errorData = await response.json();
+        setErrors(errorData.errors || { general: "An error occurred during listing creation" });
+      }
+    } catch (error) {
+      setErrors({ general: "Network error. Please try again." });
+    }
   };
 
-  const handlePostingClick = (id: number) => {
-    setSelectedPostingId(id);
+  const handlePostingClick = (posting: Listing) => {
+    setSelectedPosting(posting);
   };
 
   return (
@@ -56,27 +71,40 @@ export default function ListingsPage() {
       <div className="home-screen-container flex flex-col w-full h-full flex-wrap overflow-y-scroll overflow-x-hidden p-10 bg-gray-100">
         <form
           onSubmit={handleSubmit}
-          className="create-new-posting h-36 w-96 border-2 mb-2 flex flex-col p-4"
+          className="create-new-posting h-auto w-96 border-2 mb-2 flex flex-col p-4"
         >
           <input
             type="text"
-            placeholder="Name of the posting"
-            value={name}
-            onChange={handleNameChange}
+            placeholder="Title"
+            value={title}
+            onChange={handleTitleChange}
             className="mb-2"
           />
-          <input
-            type="text"
-            placeholder="Description of the posting"
+          <textarea
+            placeholder="Description"
             value={description}
             onChange={handleDescriptionChange}
             className="mb-2"
           />
           <input
-            type="text"
-            placeholder="List of required roles (separated by commas)"
-            value={roles.join(", ")}
-            onChange={handleRolesChange}
+            type="number"
+            placeholder="Number of People Needed"
+            value={peopleNeeded}
+            onChange={handlePeopleNeededChange}
+            className="mb-2"
+          />
+          <input
+            type="number"
+            placeholder="Price"
+            value={price}
+            onChange={handlePriceChange}
+            className="mb-2"
+          />
+          <input
+            type="number"
+            placeholder="Elo"
+            value={elo}
+            onChange={handleEloChange}
             className="mb-2"
           />
           <button
@@ -85,40 +113,42 @@ export default function ListingsPage() {
           >
             Create
           </button>
+          {errors.general && <p className="error">{errors.general}</p>}
+          {success && <p className="success">{success}</p>}
         </form>
         <div className="postings-container flex flex-row h-fill w-full border-2">
           <div className="posting-container h-96 w-full border-2 p-4 overflow-y-auto">
-            {postings.map((posting) => (
+            {postings.map((posting, index) => (
               <div
-                key={posting.id}
+                key={index}
                 className="mb-4 p-2 border-b cursor-pointer"
-                onClick={() => handlePostingClick(posting.id)}
+                onClick={() => handlePostingClick(posting)}
               >
-                <h3>{posting.name}</h3>
+                <h3>{posting.title}</h3>
                 <p>{posting.description}</p>
-                <ul>
-                  {posting.roles.map((role, index) => (
-                    <li key={index}>{role}</li>
-                  ))}
-                </ul>
+                <p>People Needed: {posting.people_needed}</p>
+                <p>Price: ${posting.price}</p>
+                <p>Elo: {posting.elo}</p>
               </div>
             ))}
           </div>
           <div className="group-container h-96 w-64 border-2 p-4 overflow-y-auto">
-            {selectedPostingId && roleAssignments[selectedPostingId] ? (
-              roleAssignments[selectedPostingId].map((assignment, index) => (
-                <div key={index} className="mb-4 p-2">
-                  <span>{assignment.role}:</span>{" "}
-                  <strong>{assignment.filled ? "Filled" : "Vacant"}</strong>
-                </div>
-              ))
+            {selectedPosting ? (
+              <>
+                <h3>{selectedPosting.title}</h3>
+                <p>{selectedPosting.description}</p>
+                <p>People Needed: {selectedPosting.people_needed}</p>
+                <p>Price: ${selectedPosting.price}</p>
+                <p>Elo: {selectedPosting.elo}</p>
+              </>
             ) : (
-              <p>Select a posting to see role details.</p>
+              <p>Select a posting to see details.</p>
             )}
           </div>
         </div>
-        <div></div>
       </div>
     </div>
   );
-}
+};
+
+export default ListingsPage;

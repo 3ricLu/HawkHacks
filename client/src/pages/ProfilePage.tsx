@@ -24,6 +24,7 @@ const ProfilePage: React.FC = () => {
         const response = await fetch('/api/profile', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include' // Ensure cookies are included
         });
         if (response.ok) {
           const data = await response.json();

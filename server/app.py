@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 from flask_session import Session
 from flask_migrate import Migrate
-
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 
 load_dotenv()
 
@@ -23,6 +23,11 @@ Session(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
 # Create the uploads directory if it does not exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -32,16 +37,13 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-
-
-
-#logging out
+# Logging out
 @app.route('/api/logout', methods=['POST'])
 def logout():
     session.clear()
     return jsonify({'message': 'Logout successful'}), 200
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -54,6 +56,9 @@ class User(db.Model):
     bio = db.Column(db.Text)
     resume = db.Column(db.String(255))  # Path to the uploaded resume file
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class Listing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,15 +68,14 @@ class Listing(db.Model):
     price = db.Column(db.Integer, nullable=False)
     elo = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    members = db.Column(db.ARRAY(db.Integer), default=[])
 
     user = db.relationship('User', backref=db.backref('listings', lazy=True))
-
-
 
 with app.app_context():
     db.create_all()
 
-#delete all data
+# Delete all data
 @app.route('/api/delete-all-users', methods=['POST'])
 def delete_all_users():
     try:
@@ -86,16 +90,11 @@ def delete_all_users():
 
 
 
-
-
-#create a listing --------------------------
+# Create a listing
 @app.route('/api/listings', methods=['POST'])
+@login_required
 def create_listing():
     try:
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'errors': {'general': 'User not authenticated'}}), 401
-
         data = request.get_json()
         app.logger.info(f"Received listing data: {data}")
 
@@ -111,7 +110,7 @@ def create_listing():
             people_needed=int(data['people_needed']),
             price=int(data['price']),
             elo=int(data['elo']),
-            user_id=user_id
+            user_id=current_user.id
         )
 
         db.session.add(new_listing)
@@ -121,28 +120,7 @@ def create_listing():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred while creating the listing'}}), 500
-    
-#get all listing ---------------------
-@app.route('/api/listings', methods=['GET'])
-def get_listings():
-    try:
-        listings = Listing.query.all()
-        listings_data = [
-            {
-                'id': listing.id,
-                'title': listing.title,
-                'description': listing.description,
-                'people_needed': listing.people_needed,
-                'price': listing.price,
-                'elo': listing.elo,
-                'user_id': listing.user_id,
-            }
-            for listing in listings
-        ]
-        return jsonify({'listings': listings_data}), 200
-    except Exception as e:
-        app.logger.error(f"Error: {e}")
-        return jsonify({'errors': {'general': 'An error occurred while fetching listings'}}), 500
+
 
 
 
@@ -194,8 +172,7 @@ def login():
 
         user = User.query.filter_by(username=data['username']).first()
         if user and check_password_hash(user.password_hash, data['password']):
-            # Login successful, set session or token here
-            session['user_id'] = user.id
+            login_user(user)  # Set the user as logged in
             return jsonify({'message': 'Login successful'}), 200
         else:
             return jsonify({'errors': {'general': 'Invalid username or password'}}), 400
@@ -204,6 +181,8 @@ def login():
         return jsonify({'errors': {'general': 'An error occurred during login'}}), 500
 
 
+
+# Update profile
 @app.route('/api/profile', methods=['POST'])
 def update_profile():
     try:
@@ -250,13 +229,57 @@ def update_profile():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred during profile update'}}), 500
+# Fetch all listings
+# Fetch all listings
+@app.route('/api/listings', methods=['GET'])
+def get_listings():
+    try:
+        listings = Listing.query.all()
+        listings_data = [
+            {
+                'listingID': listing.id,
+                'title': listing.title,
+                'description': listing.description,
+                'people_needed': listing.people_needed,
+                'price': listing.price,
+                'elo': listing.elo,
+                'members': listing.members,
+                'listingOwner': listing.user.username
+            }
+            for listing in listings
+        ]
+        return jsonify({'listings': listings_data}), 200
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({'errors': {'general': 'An error occurred while fetching listings'}}), 500
+
+
+
+# Join a listing
+@app.route('/api/listings/join/<int:listing_id>', methods=['POST'])
+@login_required
+def join_listing(listing_id):
+    try:
+        listing = Listing.query.get(listing_id)
+        if listing:
+            if current_user.id not in listing.members:
+                listing.members.append(current_user.id)
+                db.session.commit()
+                return jsonify({'message': 'Joined successfully'}), 200
+            else:
+                return jsonify({'errors': {'general': 'User already a member'}}), 400
+        return jsonify({'errors': {'general': 'Listing not found'}}), 404
+    except Exception as e:
+        app.logger.error(f"Error: {e}")
+        return jsonify({'errors': {'general': 'An error occurred while joining the listing'}}), 500
 
     
-#Get method
+
+
+# Get profile
 @app.route('/api/profile', methods=['GET'])
 def get_profile():
     try:
-        # Authenticate the user
         user_id = session.get('user_id')
         if not user_id:
             return jsonify({'errors': {'general': 'User not authenticated'}}), 401
@@ -282,14 +305,10 @@ def get_profile():
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred while fetching profile information'}}), 500
 
-
-
-
-# Register endpoint (if needed)
+# Register user
 @app.route('/api/register', methods=['POST'])
 def register_user():
     try:
-        # Handling form data and file upload
         data = request.form.to_dict()
         resume = request.files.get('resume')
         app.logger.info(f"Received data: {data}")
@@ -303,7 +322,7 @@ def register_user():
         if not data['age'].isdigit() or not 1 <= int(data['age']) <= 150:
             return jsonify({'errors': {'age': 'Age must be an integer between 1 and 150'}}), 400
 
-        tags = request.form.getlist('tags')  # Get list of tags from form data
+        tags = request.form.getlist('tags')
 
         hashed_password = generate_password_hash(data['password'])
 

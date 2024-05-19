@@ -1,99 +1,72 @@
 import Navigation from "../components/Navigation";
 import Listing from "../components/Listing";
+import React, { useEffect, useState } from "react";
+
+interface Listing {
+  title: string;
+  price: number;
+  elo: number;
+  roles: string[];
+  description: string;
+  members: string[];
+  listingOwner: string;
+  listingID: number;
+  people_needed: number;
+}
+
 export default function GroupPage() {
-  const mockListings = [
-    {
-      title: "Awesome Gaming Squad",
-      price: 50,
-      elo: 2,
-      roles: ["Leader", "Sniper", "Support", "Scout"],
-      description: "Join our squad for an epic gaming experience!",
-      members: ["Alice", "Bob", "Charlie", "Dave"],
-      listingOwner: "JohnDoe123",
-      listingID: 1,
-    },
-    {
-      title: "Pro League Team",
-      price: 75,
-      elo: 3200,
-      roles: ["Tank", "Healer", "DPS"],
-      description: "We are looking for dedicated players to join our team!",
-      members: ["Eve", "Frank", "Grace"],
-      listingOwner: "ProGamer456",
-      listingID: 2,
-    },
-    {
-      title: "Casual Weekend Warriors",
-      price: 30,
-      elo: 1800,
-      roles: ["Leader", "Scout"],
-      description: "Casual group for weekend gaming fun.",
-      members: ["Hank", "Ivy"],
-      listingOwner: "CasualGamer789",
-      listingID: 3,
-    },
-    {
-      title: "Awesome Gaming Squad",
-      price: 50,
-      elo: 2,
-      roles: ["Leader", "Sniper", "Support", "Scout"],
-      description: "Join our squad for an epic gaming experience!",
-      members: ["Alice", "Bob", "Charlie", "Dave"],
-      listingOwner: "JohnDoe123",
-      listingID: 1,
-    },
-    {
-      title: "Pro League Team",
-      price: 75,
-      elo: 3200,
-      roles: ["Tank", "Healer", "DPS"],
-      description: "We are looking for dedicated players to join our team!",
-      members: ["Eve", "Frank", "Grace"],
-      listingOwner: "ProGamer456",
-      listingID: 2,
-    },
-    {
-      title: "Casual Weekend Warriors",
-      price: 30,
-      elo: 1800,
-      roles: ["Leader", "Scout"],
-      description: "Casual group for weekend gaming fun.",
-      members: ["Hank", "Ivy"],
-      listingOwner: "CasualGamer789",
-      listingID: 3,
-    },
-    {
-      title: "Casual Weekend Warriors",
-      price: 30,
-      elo: 1800,
-      roles: ["Leader", "Scout"],
-      description: "Casual group for weekend gaming fun.",
-      members: ["Hank", "Ivy"],
-      listingOwner: "CasualGamer789",
-      listingID: 3,
-    },
-    {
-      title: "Awesome Gaming Squad",
-      price: 50,
-      elo: 2,
-      roles: ["Leader", "Sniper", "Support", "Scout"],
-      description: "Join our squad for an epic gaming experience!",
-      members: ["Alice", "Bob", "Charlie", "Dave"],
-      listingOwner: "JohnDoe123",
-      listingID: 1,
-    },
-    {
-      title: "Pro League Team",
-      price: 75,
-      elo: 3200,
-      roles: ["Tank", "Healer", "DPS"],
-      description: "We are looking for dedicated players to join our team!",
-      members: ["Eve", "Frank"],
-      listingOwner: "ProGamer456",
-      listingID: 2,
-    },
-    // Add more mock listings as needed
-  ];
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const response = await fetch("/api/listings", {
+          credentials: 'include', // Include credentials with fetch requests
+        });
+        const data = await response.json();
+        console.log("Fetched listings:", data.listings);
+        // Ensure members is an array
+        const sanitizedListings = data.listings.map((listing: Listing) => ({
+          ...listing,
+          members: listing.members || [],
+        }));
+        setListings(sanitizedListings);
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
+  const handleJoin = async (listingID: number) => {
+    try {
+      const response = await fetch(`/api/listings/join/${listingID}`, {
+        method: "POST",
+        credentials: 'include', // Include credentials with fetch requests
+      });
+      if (response.ok) {
+        setListings((prevListings) =>
+          prevListings.map((listing) =>
+            listing.listingID === listingID
+              ? { ...listing, members: [...listing.members, "NewMember"] } // Replace "NewMember" with actual user
+              : listing
+          )
+        );
+      } else {
+        console.error("Error joining listing:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error joining listing:", error);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="App flex flex-row h-screen">
@@ -105,9 +78,9 @@ export default function GroupPage() {
           </div>
         </div>
         <div className="listings-container h-4/5 w-fill bg-gray-100 align-bottom grid grid-cols-3 justify-center">
-          {mockListings.map((listing) => (
-            <div className="m-2">
-              <Listing key={listing.listingID} {...listing} />{" "}
+          {listings.map((listing) => (
+            <div key={listing.listingID} className="m-2">
+              <Listing {...listing} onJoin={handleJoin} />
             </div>
           ))}
         </div>

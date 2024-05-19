@@ -7,7 +7,6 @@ interface Listing {
   people_needed: number;
   price: number;
   elo: number;
-  user_id: number;
 }
 
 const ListingsPage: React.FC = () => {
@@ -35,18 +34,16 @@ const ListingsPage: React.FC = () => {
 
   return (
     <div>
-      <h1>Listings</h1>
-      <ul>
-        {listings.map(listing => (
-          <li key={listing.id}>
-            <h2>{listing.title}</h2>
-            <p>{listing.description}</p>
-            <p>People Needed: {listing.people_needed}</p>
-            <p>Price: {listing.price}</p>
-            <p>ELO: {listing.elo}</p>
-          </li>
-        ))}
-      </ul>
+      <h1>Job Listings</h1>
+      {listings.map((listing) => (
+        <div key={listing.id}>
+          <h2>{listing.title}</h2>
+          <p>{listing.description}</p>
+          <p>People Needed: {listing.people_needed}</p>
+          <p>Price: {listing.price}</p>
+          <p>ELO: {listing.elo}</p>
+        </div>
+      ))}
     </div>
   );
 };
