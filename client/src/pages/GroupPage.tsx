@@ -1,6 +1,6 @@
+import React, { useEffect, useState } from "react";
 import Navigation from "../components/Navigation";
 import Listing from "../components/Listing";
-import React, { useEffect, useState } from "react";
 
 interface Listing {
   title: string;
@@ -21,12 +21,9 @@ export default function GroupPage() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await fetch("/api/listings", {
-          credentials: 'include', // Include credentials with fetch requests
-        });
+        const response = await fetch("/api/listings");
         const data = await response.json();
         console.log("Fetched listings:", data.listings);
-        // Ensure members is an array
         const sanitizedListings = data.listings.map((listing: Listing) => ({
           ...listing,
           members: listing.members || [],
@@ -44,18 +41,24 @@ export default function GroupPage() {
 
   const handleJoin = async (listingID: number) => {
     try {
+      console.log("Joining listing ID:", listingID);
       const response = await fetch(`/api/listings/join/${listingID}`, {
         method: "POST",
-        credentials: 'include', // Include credentials with fetch requests
       });
       if (response.ok) {
-        setListings((prevListings) =>
-          prevListings.map((listing) =>
-            listing.listingID === listingID
-              ? { ...listing, members: [...listing.members, "NewMember"] } // Replace "NewMember" with actual user
-              : listing
-          )
-        );
+        console.log("Join successful");
+
+        // Refetch the updated listings after a successful join
+        const updatedListingsResponse = await fetch("/api/listings");
+        const updatedListingsData = await updatedListingsResponse.json();
+        console.log("Updated listings after join:", updatedListingsData.listings);
+
+        const sanitizedListings = updatedListingsData.listings.map((listing: Listing) => ({
+          ...listing,
+          members: listing.members || [],
+        }));
+        setListings(sanitizedListings);
+        console.log("State updated with new listings:", sanitizedListings);
       } else {
         console.error("Error joining listing:", response.statusText);
       }

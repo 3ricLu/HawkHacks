@@ -1,4 +1,3 @@
-import os
 from flask import Flask, request, jsonify, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -9,6 +8,8 @@ from dotenv import load_dotenv
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from sqlalchemy import text  # Import the text function from SQLAlchemy
+import os
 
 load_dotenv()
 
@@ -68,7 +69,7 @@ class Listing(db.Model):
     price = db.Column(db.Integer, nullable=False)
     elo = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    members = db.Column(db.ARRAY(db.Integer), default=[])
+    members = db.Column(db.ARRAY(db.String), default=[])
 
     user = db.relationship('User', backref=db.backref('listings', lazy=True))
 
@@ -157,7 +158,6 @@ def create_account():
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred during account creation'}}), 500
 
-# Login endpoint
 @app.route('/api/login', methods=['POST'])
 def login():
     try:
@@ -172,13 +172,17 @@ def login():
 
         user = User.query.filter_by(username=data['username']).first()
         if user and check_password_hash(user.password_hash, data['password']):
-            login_user(user)  # Set the user as logged in
+            login_user(user)  # Set the user as logged in using Flask-Login
+            session['user_id'] = user.id  # Explicitly set the user ID in session if needed
             return jsonify({'message': 'Login successful'}), 200
         else:
             return jsonify({'errors': {'general': 'Invalid username or password'}}), 400
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred during login'}}), 500
+
+
+
 
 
 
@@ -230,7 +234,6 @@ def update_profile():
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred during profile update'}}), 500
 # Fetch all listings
-# Fetch all listings
 @app.route('/api/listings', methods=['GET'])
 def get_listings():
     try:
@@ -255,35 +258,67 @@ def get_listings():
 
 
 
-# Join a listing
 @app.route('/api/listings/join/<int:listing_id>', methods=['POST'])
 @login_required
 def join_listing(listing_id):
     try:
         listing = Listing.query.get(listing_id)
-        if listing:
-            if current_user.id not in listing.members:
-                listing.members.append(current_user.id)
+        if not listing:
+            app.logger.error(f"Listing ID: {listing_id} not found")
+            return jsonify({'errors': {'general': 'Listing not found'}}), 404
+
+        username = current_user.username
+        app.logger.info(f"User '{username}' is attempting to join listing ID: {listing_id}")
+
+        if listing.members is None:
+            listing.members = []
+
+        app.logger.info(f"Current members: {listing.members}")
+
+        if username not in listing.members:
+            try:
+                db.session.execute(
+                    text("UPDATE listing SET members = array_append(members, :username) WHERE id = :listing_id"),
+                    {'username': username, 'listing_id': listing_id}
+                )
                 db.session.commit()
-                return jsonify({'message': 'Joined successfully'}), 200
-            else:
-                return jsonify({'errors': {'general': 'User already a member'}}), 400
-        return jsonify({'errors': {'general': 'Listing not found'}}), 404
+                app.logger.info(f"Successfully committed changes to DB")
+            except Exception as e:
+                app.logger.error(f"Error committing changes: {e}")
+                db.session.rollback()
+                return jsonify({'errors': {'general': 'An error occurred while committing the changes'}}), 500
+
+            # Verify the change in the database
+            updated_listing = Listing.query.get(listing_id)
+            app.logger.info(f"Updated members in DB: {updated_listing.members}")
+
+            return jsonify({'message': 'Joined successfully'}), 200
+        else:
+            app.logger.warning(f"User '{username}' is already a member of listing ID: {listing_id}")
+            return jsonify({'errors': {'general': 'User already a member'}}), 400
     except Exception as e:
         app.logger.error(f"Error: {e}")
+        db.session.rollback()
         return jsonify({'errors': {'general': 'An error occurred while joining the listing'}}), 500
+
+
+
+
+
+
+
+
+
+
 
     
 
 
-# Get profile
 @app.route('/api/profile', methods=['GET'])
+@login_required
 def get_profile():
     try:
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'errors': {'general': 'User not authenticated'}}), 401
-
+        user_id = current_user.id  # Use Flask-Login to get the current user ID
         user = User.query.get(user_id)
         if not user:
             return jsonify({'errors': {'general': 'User not found'}}), 404
@@ -304,6 +339,7 @@ def get_profile():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({'errors': {'general': 'An error occurred while fetching profile information'}}), 500
+
 
 # Register user
 @app.route('/api/register', methods=['POST'])

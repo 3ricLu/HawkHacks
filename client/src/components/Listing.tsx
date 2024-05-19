@@ -2,7 +2,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 
-// Define the interface for the props
 interface ListingProps {
   title: string;
   price: number;
@@ -16,7 +15,6 @@ interface ListingProps {
   onJoin: (listingID: number) => void;
 }
 
-// Create the component
 const Listing: React.FC<ListingProps> = ({
   title,
   price,
@@ -30,6 +28,7 @@ const Listing: React.FC<ListingProps> = ({
   onJoin,
 }) => {
   const handleJoinClick = () => {
+    console.log(`Joining listing with ID: ${listingID}, Current members: ${members.length}`);
     if (members.length < people_needed) {
       onJoin(listingID);
     }
@@ -77,6 +76,9 @@ const Listing: React.FC<ListingProps> = ({
         <h1 className="price font-bold text-purple-200 px-3 text-xl">
           {price}C
         </h1>
+      </div>
+      <div className="members-list text-white px-3 py-2 text-l">
+        Members: {members.join(", ")}
       </div>
     </div>
   );
