@@ -14,8 +14,9 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
+
 CORS(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://hawkhacks:123abc@localhost:5432/hawk_hacks_user'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "your_secret_key"
 app.config["SESSION_TYPE"] = "filesystem"
